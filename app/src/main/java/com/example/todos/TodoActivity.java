@@ -56,11 +56,6 @@ public class TodoActivity extends AppCompatActivity {
         //set the bindings
         binding.setTodo(todo);
         //spinner, selected right
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        EditText todoEt = (EditText) findViewById(R.id.editTodo);
-        todoEt.setText("fuck!!!");
-        EditText et = (EditText) findViewById(R.id.editExpiryDate);
-        et.setSaveEnabled(false);
         if (Integer.valueOf(todo.category.get()) == 0&&c!=null) {
             for (Category cat : list.ItemList) {
                 if (Integer.valueOf(cat.catId.get()) == Integer.valueOf(c.catId.get())) {
@@ -69,10 +64,7 @@ public class TodoActivity extends AppCompatActivity {
                 position++;
             }
             spinner.setSelection(position);
-            //set create data as today
-            Date date = new Date();
-            String today = dateFormat.format(date);
-            et.setText(today);
+
         }
         else {
             for (Category cat : list.ItemList) {

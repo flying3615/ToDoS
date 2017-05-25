@@ -56,7 +56,7 @@ public class TodoListActivity extends AppCompatActivity
 
     boolean done = false;
     private void showDone(){
-        done=true;
+        done=!done;
         //trigger onCreateLoader reload...
         getLoaderManager().restartLoader(URL_LOADER, null, TodoListActivity.this);
     }
@@ -179,6 +179,11 @@ public class TodoListActivity extends AppCompatActivity
                 createTestTodos();
                 break;
             case R.id.action_show_done:
+                if(done){
+                    item.setTitle("show done");
+                }else{
+                    item.setTitle("show undone");
+                }
                 showDone();
                 break;
         }
@@ -241,7 +246,10 @@ public class TodoListActivity extends AppCompatActivity
             selection = TodosEntry.COLUMN_DONE + "=?";
             arguments = new String[1];
             arguments[0] = "1";
-            done = false;
+        }else{
+            selection = TodosEntry.COLUMN_DONE + "=?";
+            arguments = new String[1];
+            arguments[0] = "0";
         }
 
 

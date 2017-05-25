@@ -2,13 +2,17 @@ package com.example.todos;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.media.Image;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.todos.data.TodosContract;
+import com.squareup.picasso.Picasso;
 
 
 public class TodosCursorAdapter extends CursorAdapter {
@@ -28,5 +32,14 @@ public class TodosCursorAdapter extends CursorAdapter {
         int textColumn = cursor.getColumnIndex(TodosContract.TodosEntry.COLUMN_TEXT);
         String text = cursor.getString(textColumn);
         todoTextView.setText(text);
+
+
+        ImageView imageView = (ImageView) view.findViewById(R.id.doneIcon);
+        int ifDone = cursor.getInt(cursor.getColumnIndex(TodosContract.TodosEntry.COLUMN_DONE));
+        imageView.setImageDrawable(null);
+        if(ifDone==1){
+            Picasso.with(context).load(R.drawable.correct).into(imageView);
+        }
+
     }
 }
