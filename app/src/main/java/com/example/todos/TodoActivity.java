@@ -1,16 +1,21 @@
 package com.example.todos;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.icu.text.DateFormat;
+import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.todos.data.TodosContract;
@@ -20,6 +25,8 @@ import com.example.todos.model.Category;
 import com.example.todos.model.CategoryList;
 import com.example.todos.model.Todo;
 
+import java.util.Date;
+
 import static com.example.todos.data.TodosContract.TodosEntry.COLUMN_DONE;
 
 public class TodoActivity extends AppCompatActivity {
@@ -28,6 +35,7 @@ public class TodoActivity extends AppCompatActivity {
     Spinner spinner;
     CategoryList list;
     CategoryListAdapter adapter;
+    @TargetApi(Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +56,11 @@ public class TodoActivity extends AppCompatActivity {
         //set the bindings
         binding.setTodo(todo);
         //spinner, selected right
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        EditText todoEt = (EditText) findViewById(R.id.editTodo);
+        todoEt.setText("fuck!!!");
+        EditText et = (EditText) findViewById(R.id.editExpiryDate);
+        et.setSaveEnabled(false);
         if (Integer.valueOf(todo.category.get()) == 0&&c!=null) {
             for (Category cat : list.ItemList) {
                 if (Integer.valueOf(cat.catId.get()) == Integer.valueOf(c.catId.get())) {
@@ -56,6 +69,10 @@ public class TodoActivity extends AppCompatActivity {
                 position++;
             }
             spinner.setSelection(position);
+            //set create data as today
+            Date date = new Date();
+            String today = dateFormat.format(date);
+            et.setText(today);
         }
         else {
             for (Category cat : list.ItemList) {
