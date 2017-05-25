@@ -68,7 +68,6 @@ public class TodoActivity extends AppCompatActivity {
         }
 
 
-
         findViewById(R.id.save_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,8 +77,13 @@ public class TodoActivity extends AppCompatActivity {
                 }else{
                     new AlertDialog.Builder(TodoActivity.this)
                             .setTitle(getString(R.string.delete_todo_dialog_title))
-                            .setMessage("Cannot create TODO for \"All Category\"")
-                            .setIcon(android.R.drawable.ic_dialog_alert).show();
+                            .setMessage("Cannot create TODO for \"All Category\". Please select a category")
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // continue with delete
+                        }
+                    }).show();
                 }
             }
         });
