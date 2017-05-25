@@ -31,7 +31,11 @@ public class TodosCursorAdapter extends CursorAdapter {
         TextView todoTextView = (TextView) view.findViewById(R.id.tvText);
         int textColumn = cursor.getColumnIndex(TodosContract.TodosEntry.COLUMN_TEXT);
         String text = cursor.getString(textColumn);
-        todoTextView.setText(text);
+
+        int dateColumn = cursor.getColumnIndex(TodosContract.TodosEntry.COLUMN_EXPIRED);
+        String expiredDate = cursor.getString(dateColumn);
+
+        todoTextView.setText(text+"("+expiredDate+")");
 
 
         ImageView imageView = (ImageView) view.findViewById(R.id.doneIcon);

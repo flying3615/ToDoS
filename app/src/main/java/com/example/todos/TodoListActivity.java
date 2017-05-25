@@ -27,11 +27,13 @@ import com.example.todos.model.CategoryList;
 import com.example.todos.model.Todo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.todos.data.TodosContract.TodosEntry.COLUMN_DONE;
 
 public class TodoListActivity extends AppCompatActivity
-    implements LoaderManager.LoaderCallbacks<Cursor> {
+        implements LoaderManager.LoaderCallbacks<Cursor> {
     static final int ALL_RECORDS = -1;
     static final int ALL_CATEGORIES = -1;
 
@@ -55,8 +57,9 @@ public class TodoListActivity extends AppCompatActivity
 
 
     boolean done = false;
-    private void showDone(){
-        done=!done;
+
+    private void showDone() {
+        done = !done;
         //trigger onCreateLoader reload...
         getLoaderManager().restartLoader(URL_LOADER, null, TodoListActivity.this);
     }
@@ -66,7 +69,7 @@ public class TodoListActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        spinner=(Spinner) findViewById(R.id.spinCategories);
+        spinner = (Spinner) findViewById(R.id.spinCategories);
         getLoaderManager().initLoader(URL_LOADER, null, this);
         setCategories();
         final ListView lv = (ListView) findViewById(R.id.lvTodos);
@@ -76,7 +79,7 @@ public class TodoListActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 //adds the click event to the listView, reading the content
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
                 //move the cursor to the selected row
@@ -95,7 +98,7 @@ public class TodoListActivity extends AppCompatActivity
                 String todoCategory = cursor.getString(cursor.getColumnIndex(TodosEntry.COLUMN_CATEGORY));
                 //create the object that will be passed to the todoActivity
                 boolean boolDone = (todoDone == 1);
-                Todo todo = new Todo (todoId,todoText, todoCreated, todoExpireDate, boolDone,
+                Todo todo = new Todo(todoId, todoText, todoCreated, todoExpireDate, boolDone,
                         todoCategory);
                 Intent intent = new Intent(TodoListActivity.this, TodoActivity.class);
                 //pass the ID to the todoActivity
@@ -108,7 +111,7 @@ public class TodoListActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Todo todo = new Todo (0,"", "", "", false, "0");
+                Todo todo = new Todo(0, "", "", "", false, "0");
                 Intent intent = new Intent(TodoListActivity.this, TodoActivity.class);
                 //pass the ID to the todoActivity
                 intent.putExtra("todo", todo);
@@ -135,21 +138,6 @@ public class TodoListActivity extends AppCompatActivity
         });
 
     }
-    private void createTestTodos() {
-        for (int i = 1; i<=20; i++) {
-            ContentValues values = new ContentValues();
-            values.put(TodosEntry.COLUMN_TEXT, "Todo Item #" + i);
-            values.put(TodosEntry.COLUMN_CATEGORY, 1);
-            values.put(TodosEntry.COLUMN_CREATED, "2016-01-02");
-            values.put(COLUMN_DONE, 0);
-            TodosQueryHandler handler = new TodosQueryHandler(
-                    this.getContentResolver());
-            handler.startInsert(1, null, TodosEntry.CONTENT_URI,
-                    values );
-        }
-        }
-
-
 
 
     @Override
@@ -158,6 +146,7 @@ public class TodoListActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -175,13 +164,10 @@ public class TodoListActivity extends AppCompatActivity
             case R.id.action_delete_all_todos:
                 deleteTodo(ALL_RECORDS);
                 break;
-            case R.id.action_create_test_data:
-                createTestTodos();
-                break;
             case R.id.action_show_done:
-                if(done){
+                if (done) {
                     item.setTitle("show done");
-                }else{
+                } else {
                     item.setTitle("show undone");
                 }
                 showDone();
@@ -220,6 +206,7 @@ public class TodoListActivity extends AppCompatActivity
         categoriesHandler.startQuery(1, null, TodosContract.CategoriesEntry.CONTENT_URI, null, null, null,
                 TodosContract.CategoriesEntry.COLUMN_DESCRIPTION);
     }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = {TodosEntry.COLUMN_TEXT,
@@ -230,45 +217,44 @@ public class TodoListActivity extends AppCompatActivity
                 TodosEntry.COLUMN_CATEGORY,
                 TodosContract.CategoriesEntry.TABLE_NAME + "." +
                         TodosContract.CategoriesEntry.COLUMN_DESCRIPTION};
-            String selection;
-            String[] arguments = new String[1];
+        String selection;
+        List<String> arguments = new ArrayList<>();
 
-            if (spinner.getSelectedItemId()< 0) {
-                selection = "";
-                arguments = null;
-            }
-            else {
-                selection = TodosEntry.COLUMN_CATEGORY + "=?";
-                arguments[0] = String.valueOf(spinner.getSelectedItemId());
-            }
-
-        if (done) {
-            selection = TodosEntry.COLUMN_DONE + "=?";
-            arguments = new String[1];
-            arguments[0] = "1";
-        }else{
-            selection = TodosEntry.COLUMN_DONE + "=?";
-            arguments = new String[1];
-            arguments[0] = "0";
+        if (spinner.getSelectedItemId() < 0) {
+            selection = "";
+        } else {
+            selection = TodosEntry.COLUMN_CATEGORY + "=? and ";
+            arguments.add(String.valueOf(spinner.getSelectedItemId()));
         }
 
+        if (done) {
+            selection += TodosEntry.COLUMN_DONE + "=?";
+            arguments.add("1");
+        } else {
+            selection += TodosEntry.COLUMN_DONE + "=?";
+            arguments.add("0");
+        }
 
-            Loader<Cursor> lc = new CursorLoader(
-                    this,
-                    TodosEntry.CONTENT_URI,
-                    projection,
-                    selection, arguments, null);
+        String[] argArray = new String[arguments.size()];
+
+        Loader<Cursor> lc = new CursorLoader(
+                this,
+                TodosEntry.CONTENT_URI,
+                projection,
+                selection, arguments.toArray(argArray), null);
         return lc;
     }
+
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
         adapter.swapCursor(data);
-        if (categoryAdapter == null){
+        if (categoryAdapter == null) {
             categoryAdapter = new CategoryListAdapter(list.ItemList);
             spinner.setAdapter(categoryAdapter);
         }
     }
+
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         adapter.swapCursor(null);
