@@ -56,6 +56,15 @@ public class TodoListActivity extends AppCompatActivity
         handler.startDelete(1, null,
                 TodosEntry.CONTENT_URI, TodosEntry._ID + " =?", args);
     }
+
+    private void showDone(){
+        TodosQueryHandler handler = new TodosQueryHandler(
+                this.getContentResolver());
+        handler.startQuery(1, null, TodosContract.TodosEntry.CONTENT_URI, null, null, null,
+                TodosContract.CategoriesEntry.COLUMN_DESCRIPTION);
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,6 +176,10 @@ public class TodoListActivity extends AppCompatActivity
             case R.id.action_create_test_data:
                 createTestTodos();
                 break;
+
+            case R.id.action_show_done:
+                //showDone();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -200,7 +213,7 @@ public class TodoListActivity extends AppCompatActivity
         categoriesHandler.startQuery(1, null, TodosContract.CategoriesEntry.CONTENT_URI, null, null, null,
                 TodosContract.CategoriesEntry.COLUMN_DESCRIPTION);
     }
-        @Override
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = {TodosEntry.COLUMN_TEXT,
                 TodosEntry.TABLE_NAME + "." + TodosEntry._ID,

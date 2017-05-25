@@ -3,7 +3,7 @@
         <variable
             name="todo"
             type="com.example.todos.model.Todo"  />
-       >
+
     </data>
 
         <RelativeLayout
