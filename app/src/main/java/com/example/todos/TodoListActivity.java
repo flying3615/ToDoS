@@ -6,6 +6,7 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +26,10 @@ import com.example.todos.model.Category;
 import com.example.todos.model.CategoryList;
 import com.example.todos.model.Todo;
 
+import java.io.Serializable;
+
+import static com.example.todos.data.TodosContract.TodosEntry.COLUMN_DONE;
+
 public class TodoListActivity extends AppCompatActivity
     implements LoaderManager.LoaderCallbacks<Cursor> {
     static final int ALL_RECORDS = -1;
@@ -36,15 +41,6 @@ public class TodoListActivity extends AppCompatActivity
     Spinner spinner;
     CategoryList list = new CategoryList();
     CategoryListAdapter categoryAdapter;
-    private void updateTodo() {
-        int id = 2;
-        String[] args = {String.valueOf(id)};
-        ContentValues values = new ContentValues();
-        values.put(TodosEntry.COLUMN_TEXT, "Call Mr Clark Kent");
-        int numRows = getContentResolver().update(TodosEntry.CONTENT_URI, values,
-                TodosEntry._ID + "=?", args);
-        Log.d("Update Rows ", String.valueOf(numRows));
-    }
 
     private void deleteTodo(int id) {
         String[] args = {String.valueOf(id)};
@@ -60,8 +56,21 @@ public class TodoListActivity extends AppCompatActivity
     private void showDone(){
         TodosQueryHandler handler = new TodosQueryHandler(
                 this.getContentResolver());
-        handler.startQuery(1, null, TodosContract.TodosEntry.CONTENT_URI, null, null, null,
+        String[] projection = {TodosEntry.COLUMN_TEXT,
+                TodosEntry.TABLE_NAME + "." + TodosEntry._ID,
+                TodosEntry.COLUMN_CREATED,
+                TodosEntry.COLUMN_EXPIRED,
+                TodosEntry.COLUMN_DONE,
+                TodosEntry.COLUMN_CATEGORY,
+                TodosContract.CategoriesEntry.TABLE_NAME + "." +
+                        TodosContract.CategoriesEntry.COLUMN_DESCRIPTION};
+
+        String selection = TodosEntry.COLUMN_DONE+"=?";
+        String[] args = {"1"};
+        handler.startQuery(1, null, TodosContract.TodosEntry.CONTENT_URI, projection, selection,args,
                 TodosContract.CategoriesEntry.COLUMN_DESCRIPTION);
+//        this.getContentResolver().notifyChange(new Uri("content://com.example.todos.todosprovider/todos"), null);
+
     }
 
 
@@ -92,7 +101,7 @@ public class TodoListActivity extends AppCompatActivity
                 String todoExpireDate = cursor.getString(
                         cursor.getColumnIndex(TodosEntry.COLUMN_EXPIRED));
                 int todoDone = cursor.getInt(
-                        cursor.getColumnIndex(TodosEntry.COLUMN_DONE));
+                        cursor.getColumnIndex(COLUMN_DONE));
                 String todoCreated = cursor.getString(
                         cursor.getColumnIndex(TodosEntry.COLUMN_CREATED));
                 String todoCategory = cursor.getString(cursor.getColumnIndex(TodosEntry.COLUMN_CATEGORY));
@@ -116,6 +125,7 @@ public class TodoListActivity extends AppCompatActivity
                 //pass the ID to the todoActivity
                 intent.putExtra("todo", todo);
                 intent.putExtra("categories", list);
+                intent.putExtra("current_select_category", (Serializable) spinner.getSelectedItem());
                 startActivity(intent);
             }
         });
@@ -135,6 +145,7 @@ public class TodoListActivity extends AppCompatActivity
 
             }
         });
+
     }
     private void createTestTodos() {
         for (int i = 1; i<=20; i++) {
@@ -142,13 +153,16 @@ public class TodoListActivity extends AppCompatActivity
             values.put(TodosEntry.COLUMN_TEXT, "Todo Item #" + i);
             values.put(TodosEntry.COLUMN_CATEGORY, 1);
             values.put(TodosEntry.COLUMN_CREATED, "2016-01-02");
-            values.put(TodosEntry.COLUMN_DONE, 0);
+            values.put(COLUMN_DONE, 0);
             TodosQueryHandler handler = new TodosQueryHandler(
                     this.getContentResolver());
             handler.startInsert(1, null, TodosEntry.CONTENT_URI,
                     values );
         }
         }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -176,14 +190,14 @@ public class TodoListActivity extends AppCompatActivity
             case R.id.action_create_test_data:
                 createTestTodos();
                 break;
-
             case R.id.action_show_done:
-                //showDone();
+                showDone();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
 
     private void setCategories() {
         //get cursor with all the activities
@@ -219,7 +233,7 @@ public class TodoListActivity extends AppCompatActivity
                 TodosEntry.TABLE_NAME + "." + TodosEntry._ID,
                 TodosEntry.COLUMN_CREATED,
                 TodosEntry.COLUMN_EXPIRED,
-                TodosEntry.COLUMN_DONE,
+                COLUMN_DONE,
                 TodosEntry.COLUMN_CATEGORY,
                 TodosContract.CategoriesEntry.TABLE_NAME + "." +
                         TodosContract.CategoriesEntry.COLUMN_DESCRIPTION};
@@ -234,11 +248,14 @@ public class TodoListActivity extends AppCompatActivity
                 selection = TodosEntry.COLUMN_CATEGORY + "=?";
                 arguments[0] = String.valueOf(spinner.getSelectedItemId());
             }
-        return new CursorLoader(
-                this,
-                TodosEntry.CONTENT_URI,
-                projection,
-                selection, arguments, null);
+
+
+            Loader<Cursor> lc = new CursorLoader(
+                    this,
+                    TodosEntry.CONTENT_URI,
+                    projection,
+                    selection, arguments, null);
+        return lc;
     }
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {

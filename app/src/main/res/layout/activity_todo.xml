@@ -61,5 +61,13 @@
                 android:checked="@={todo.done}"
                 android:text="Done" />
 
+            <Button
+                android:id="@+id/save_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/editTodo"
+                android:layout_toEndOf="@+id/checkBox"
+                android:text="save" />
+
         </RelativeLayout>
 </layout>

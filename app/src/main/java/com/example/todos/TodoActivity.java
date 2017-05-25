@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Spinner;
 
 import com.example.todos.data.TodosContract;
@@ -18,6 +19,8 @@ import com.example.todos.databinding.ActivityTodoBinding;
 import com.example.todos.model.Category;
 import com.example.todos.model.CategoryList;
 import com.example.todos.model.Todo;
+
+import static com.example.todos.data.TodosContract.TodosEntry.COLUMN_DONE;
 
 public class TodoActivity extends AppCompatActivity {
     Todo todo;
@@ -35,14 +38,24 @@ public class TodoActivity extends AppCompatActivity {
         Intent intent = getIntent();
         todo = (Todo)intent.getSerializableExtra("todo");
         list = (CategoryList) intent.getSerializableExtra("categories");
+
+        Category c = (Category) intent.getSerializableExtra("current_select_category");
+
+
         adapter = new CategoryListAdapter(list.ItemList);
         spinner=(Spinner) findViewById(R.id.spCategories);
         spinner.setAdapter(adapter);
         //set the bindings
         binding.setTodo(todo);
         //spinner, selected right
-        if (Integer.valueOf(todo.category.get()) == 0) {
-            position = 1;
+        if (Integer.valueOf(todo.category.get()) == 0&&c!=null) {
+            for (Category cat : list.ItemList) {
+                if (Integer.valueOf(cat.catId.get()) == Integer.valueOf(c.catId.get())) {
+                    break;
+                }
+                position++;
+            }
+            spinner.setSelection(position);
         }
         else {
             for (Category cat : list.ItemList) {
@@ -53,6 +66,23 @@ public class TodoActivity extends AppCompatActivity {
             }
             spinner.setSelection(position);
         }
+
+
+
+        findViewById(R.id.save_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(saveOrUpdateTODO()){
+                    Intent goBack = new Intent(TodoActivity.this,TodoListActivity.class);
+                    startActivity(goBack);
+                }else{
+                    new AlertDialog.Builder(TodoActivity.this)
+                            .setTitle(getString(R.string.delete_todo_dialog_title))
+                            .setMessage("Cannot create TODO for \"All Category\"")
+                            .setIcon(android.R.drawable.ic_dialog_alert).show();
+                }
+            }
+        });
     }
 
     @Override
@@ -99,12 +129,21 @@ public class TodoActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();  // Always call the superclass method first
+    }
+
+
+    private boolean saveOrUpdateTODO(){
         String [] args = new String[1];
         TodosQueryHandler handler =  new TodosQueryHandler(getContentResolver());
         //save data(existing todo)
         //read the current category
         Category cat = (Category)spinner.getSelectedItem();
         int catId = cat.catId.get();
+
+        if(catId==-1){
+            return false;
+        }
+
         ContentValues values = new ContentValues();
         values.put(TodosContract.TodosEntry.COLUMN_TEXT, todo.text.get());
         values.put(TodosContract.TodosEntry.COLUMN_CATEGORY, catId);
@@ -117,6 +156,8 @@ public class TodoActivity extends AppCompatActivity {
         }
         else if(todo != null && todo.Id.get() == 0) {
             handler.startInsert(1,null,TodosContract.TodosEntry.CONTENT_URI, values);
+
         }
+        return true;
     }
 }
