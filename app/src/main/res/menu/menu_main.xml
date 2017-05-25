@@ -21,7 +21,7 @@
     <item
         android:id="@+id/aboutme"
         android:orderInCategory="103"
-        android:title="@string/aboutme"
+        android:title="@string/about_me"
         app:showAsAction="never" />
 
 </menu>

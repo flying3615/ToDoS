@@ -13,14 +13,6 @@
     <string name="newCategory">New</string>
     <string name="save_category">Save</string>
     <string name="delete_category">Delete</string>
-    <string name="aboutme">About</string>
-
-    <string-array name="categories_array">
-        <item>Home</item>
-        <item>Work</item>
-        <item>Family</item>
-        <item>Sports</item>
-        <item>Hobbies</item>
-    </string-array>
+    <string name="about_me">About</string>
 
 </resources>
