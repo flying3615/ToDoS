@@ -164,6 +164,10 @@ public class TodoListActivity extends AppCompatActivity
             case R.id.action_delete_all_todos:
                 deleteTodo(ALL_RECORDS);
                 break;
+            case R.id.aboutme:
+                Intent intentAbout = new Intent(TodoListActivity.this, about_me.class);
+                startActivity(intentAbout);
+                break;
             case R.id.action_show_done:
                 if (done) {
                     item.setTitle("show done");
