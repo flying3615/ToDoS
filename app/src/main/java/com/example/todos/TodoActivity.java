@@ -1,6 +1,8 @@
 package com.example.todos;
 
 import android.annotation.TargetApi;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,9 +14,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -25,7 +29,9 @@ import com.example.todos.model.Category;
 import com.example.todos.model.CategoryList;
 import com.example.todos.model.Todo;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import static com.example.todos.data.TodosContract.TodosEntry.COLUMN_DONE;
 
@@ -96,6 +102,30 @@ public class TodoActivity extends AppCompatActivity {
                 }
             }
         });
+
+        final EditText expiredDate = (EditText) findViewById(R.id.editExpiryDate);
+        expiredDate.setInputType(InputType.TYPE_NULL);
+        expiredDate.requestFocus();
+
+
+        expiredDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+                Calendar newCalendar = Calendar.getInstance();
+                DatePickerDialog fromDatePickerDialog = new DatePickerDialog(v.getContext(), new DatePickerDialog.OnDateSetListener() {
+
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        Calendar newDate = Calendar.getInstance();
+                        newDate.set(year, monthOfYear, dayOfMonth);
+                        expiredDate.setText(dateFormatter.format(newDate.getTime()));
+                    }
+
+                },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+                fromDatePickerDialog.show();
+            }
+        });
+
     }
 
     @Override
