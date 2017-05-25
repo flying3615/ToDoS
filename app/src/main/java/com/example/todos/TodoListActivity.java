@@ -53,24 +53,12 @@ public class TodoListActivity extends AppCompatActivity
                 TodosEntry.CONTENT_URI, TodosEntry._ID + " =?", args);
     }
 
+
+    boolean done = false;
     private void showDone(){
-        TodosQueryHandler handler = new TodosQueryHandler(
-                this.getContentResolver());
-        String[] projection = {TodosEntry.COLUMN_TEXT,
-                TodosEntry.TABLE_NAME + "." + TodosEntry._ID,
-                TodosEntry.COLUMN_CREATED,
-                TodosEntry.COLUMN_EXPIRED,
-                TodosEntry.COLUMN_DONE,
-                TodosEntry.COLUMN_CATEGORY,
-                TodosContract.CategoriesEntry.TABLE_NAME + "." +
-                        TodosContract.CategoriesEntry.COLUMN_DESCRIPTION};
-
-        String selection = TodosEntry.COLUMN_DONE+"=?";
-        String[] args = {"1"};
-        handler.startQuery(1, null, TodosContract.TodosEntry.CONTENT_URI, projection, selection,args,
-                TodosContract.CategoriesEntry.COLUMN_DESCRIPTION);
-//        this.getContentResolver().notifyChange(new Uri("content://com.example.todos.todosprovider/todos"), null);
-
+        done=true;
+        //trigger onCreateLoader reload...
+        getLoaderManager().restartLoader(URL_LOADER, null, TodoListActivity.this);
     }
 
 
@@ -241,13 +229,20 @@ public class TodoListActivity extends AppCompatActivity
             String[] arguments = new String[1];
 
             if (spinner.getSelectedItemId()< 0) {
-                selection = null;
+                selection = "";
                 arguments = null;
             }
             else {
                 selection = TodosEntry.COLUMN_CATEGORY + "=?";
                 arguments[0] = String.valueOf(spinner.getSelectedItemId());
             }
+
+        if (done) {
+            selection = TodosEntry.COLUMN_DONE + "=?";
+            arguments = new String[1];
+            arguments[0] = "1";
+            done = false;
+        }
 
 
             Loader<Cursor> lc = new CursorLoader(
